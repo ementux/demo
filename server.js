@@ -11,6 +11,10 @@ http.createServer( function (request, response) {
    if (pathname == "/") {
 			pathname = "/index.html"
    }
+	
+   if (pathname == "/healthz") {
+			pathname = "/healthz"
+   }
    
    // Print the name of the file for which request is made.
    console.log("Request for " + pathname + " received.");
