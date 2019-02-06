@@ -1,0 +1,178 @@
+# OpenShift inventory file
+# ČSOB Poisťovna TEST OpenShift v3.11 cluster 
+
+#---------------------------------------#
+# Variables common for all OSEv3 groups #
+#---------------------------------------#
+[OSEv3:vars]
+
+# Ansible SSH user
+ansible_ssh_user=root
+ansible_become=false
+
+# Ansible ssh port
+ansible_port=5122
+
+# Timeout
+timeout=60
+
+# Deployment type
+openshift_deployment_type=openshift-enterprise
+
+# OpenShift release
+openshift_release=v3.11
+
+# Disable pre-install checks
+# openshift_disable_check=memory_availability,disk_availability,docker_image_availability,package_version
+
+# Enable NFS storage for core components
+openshift_enable_unsupported_configurations=true
+
+# RPM installation
+containerized=false
+
+# Use FirewallD
+os_firewall_use_firewalld=true
+
+# OpenShift Registries Locations (RH Satellite 6)
+oreg_url=a-lcap01.csobp.tda:5000/csob_poistovna-capsule-tda-ose3-ocp_docker_images-openshift3_ose-${component}:${version}
+openshift_examples_modify_imagestreams=true
+
+# Etcd image 
+osm_etcd_image="a-lcap01.csobp.tda:5000/csob_poistovna-capsule-tda-ose3-ocp_docker_images-rhel7_etcd"
+
+#----------------------#
+# Master configuration #
+#----------------------#
+openshift_master_api_port=443
+openshift_master_console_port=443
+openshift_master_cluster_hostname=testmas-int.csobp.tda
+openshift_master_cluster_public_hostname=testmaster.csobp.tda
+openshift_master_default_subdomain=test.csobp.tda
+
+# High availability
+openshift_master_cluster_method=native
+
+# Default K8s settings
+openshift_node_kubelet_args={'pods-per-core':['10'],'max-pods':['250'],'image-gc-high-threshold':['90'],'image-gc-low-threshold':['80']}
+
+# OCP audit
+openshift_master_audit_config={"enabled":true,"auditFilePath":"/var/lib/origin/log/oscp-audit.log","maximumFileRetentionDays":10,"maximumFileSizeMegabytes":10,"maximumRetainedFiles":10}
+
+# Identity provider
+# htpasswd
+openshift_master_identity_providers=[{'name':'local','login':'true','challenge':'true','kind':'HTPasswdPasswordIdentityProvider'}]
+openshift_master_htpasswd_users={'admin':'$apr1$823kvrKp$sOXO7wUR/YbIcQ2aNSO4n1'}
+
+# OCP time synchronization (NTP)
+openshift_clock_enabled=true
+
+#-----------------------#
+# Network configuration #
+#-----------------------#
+osm_cluster_network_cidr=192.168.0.0/16
+openshift_portal_net=172.30.0.0/16
+osm_host_subnet_length=9
+os_sdn_network_plugin_name='redhat/openshift-ovs-networkpolicy'
+
+#---------------------------------#
+# Router / Registry configuration #
+#---------------------------------#
+openshift_router_selector='node-role.kubernetes.io/infra=true'
+openshift_registry_selector='node-role.kubernetes.io/infra=true'
+openshift_hosted_router_replicas=3
+openshift_hosted_registry_replicas=1
+
+# Registry disk (NFS export -> PV)
+openshift_hosted_registry_storage_kind=nfs
+openshift_hosted_registry_storage_access_modes=['ReadWriteMany']
+openshift_hosted_registry_storage_host=t-lfns02.csobp.tda
+openshift_hosted_registry_storage_nfs_directory=/exports
+openshift_hosted_registry_storage_volume_name=registry
+openshift_hosted_registry_storage_volume_size=50Gi
+openshift_hosted_registry_pullthrough=true
+
+#--------------------------#
+# Webconsole configuration #
+#--------------------------#
+openshift_web_console_install=true
+openshift_web_console_prefix=a-lcap01.csobp.tda:5000/csob_poistovna-capsule-tda-ose3-ocp_docker_images-openshift3_ose-
+
+#-----------------------#
+# Cockpit configuration #
+#-----------------------#
+# Enable Cockpit UI
+osm_use_cockpit=true
+# Internal registry GUI Cockpit deployer
+openshift_cockpit_deployer_prefix=a-lcap01.csobp.tda:5000/csob_poistovna-capsule-tda-ose3-ocp_docker_images-openshift3_
+
+#--------------------------#
+# Prometheus configuration #
+#--------------------------#
+openshift_cluster_monitoring_operator_install=true
+
+#--------------------------------#
+# OpenShift Service Catalog Vars #
+#--------------------------------#
+# Service catalog
+openshift_enable_service_catalog=true
+openshift_service_catalog_image_prefix="a-lcap01.csobp.tda:5000/csob_poistovna-capsule-tda-ose3-ocp_docker_images-openshift3_ose-"
+
+# Template service broker
+template_service_broker_install=true
+template_service_broker_prefix="a-lcap01.csobp.tda:5000/csob_poistovna-capsule-tda-ose3-ocp_docker_images-openshift3_ose-"
+
+# Ansible service broker
+ansible_service_broker_install=true
+ansible_service_broker_image_prefix="a-lcap01.csobp.tda:5000/csob_poistovna-capsule-tda-ose3-ocp_docker_images-openshift3_ose-"
+ansible_service_broker_etcd_image_prefix="a-lcap01.csobp.tda:5000/csob_poistovna-capsule-tda-ose3-ocp_docker_images-openshift3_ose-"
+
+#-----------------------#
+# Logging configuration #
+#-----------------------#
+openshift_logging_install_logging=false
+openshift_logging_es_memory_limit=8Gi
+openshift_logging_es_cluster_size=3
+openshift_logging_es_number_of_replicas=1
+openshift_logging_curator_default_days=5
+openshift_logging_kibana_nodeselector={"node-role.kubernetes.io/infra":"true"}
+openshift_logging_curator_nodeselector={"node-role.kubernetes.io/infra":"true"}
+openshift_logging_es_nodeselector={"node-role.kubernetes.io/infra":"true"}
+openshift_logging_image_prefix="a-lcap01.csobp.tda:5000/csob_poistovna-capsule-tda-ose3-ocp_docker_images-openshift3_"
+
+#--------------------#
+# Node configuration #
+#--------------------#
+[OSEv3:children]
+masters
+etcd
+nodes
+
+# OpenShift Masters
+[masters]
+a-lmas04.csobp.tda
+a-lmas05.csobp.tda
+a-lmas06.csobp.tda
+
+# Etcd servers
+[etcd]
+a-lmas04.csobp.tda
+a-lmas05.csobp.tda
+a-lmas06.csobp.tda
+
+# All OpenShift nodes
+[nodes]
+# Master/Etcd nodes
+a-lmas04.csobp.tda openshift_node_group_name='node-config-master'
+a-lmas05.csobp.tda openshift_node_group_name='node-config-master'
+a-lmas06.csobp.tda openshift_node_group_name='node-config-master'
+
+# Infra nodes
+a-linf01.csobp.tda openshift_node_group_name='node-config-infra'
+a-linf02.csobp.tda openshift_node_group_name='node-config-infra'
+a-linf03.csobp.tda openshift_node_group_name='node-config-infra'
+
+# Compute nodes
+a-lapl01.csobp.tda openshift_node_group_name='node-config-compute'
+a-lapl02.csobp.tda openshift_node_group_name='node-config-compute'
+ 
